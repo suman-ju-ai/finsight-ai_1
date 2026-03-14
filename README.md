@@ -2,7 +2,7 @@
 ### Financial Time Series Forecasting + RL Trading Agent
 **Author:** Suman Das — Senior Applied Scientist, Financial AI
 **Stack:** Python · PyTorch · Reinforcement Learning · Streamlit
-**Domain:** 10 years Banking (PNB) + MTech AI (Jadavpur University, CGPA 9.81)
+**Domain:** 10 years Banking (PNB) + MTech AI (Jadavpur University, CGPA 9.79)
 
 ## Project Goal
 End-to-end Financial AI system combining:
