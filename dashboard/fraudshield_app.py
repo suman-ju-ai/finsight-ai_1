@@ -119,11 +119,246 @@ except Exception as e:
     models_loaded = False
 
 # ── Tabs ──────────────────────────────────────────────────
-tab1, tab2, tab3 = st.tabs([
+tab0, tab1, tab2, tab3 = st.tabs([
+    "📋 Executive Summary",
     "📊 Overview",
     "🔍 Live Fraud Scorer",
     "📈 Model Performance"
 ])
+
+# ══════════════════════════════════════════════════════════
+# TAB 0 — EXECUTIVE SUMMARY
+# ══════════════════════════════════════════════════════════
+with tab0:
+    st.markdown("## 📋 Executive Summary")
+    st.markdown("*Bank Fraud Detection with Explainable AI — "
+                "Purpose, Scope and Actions Taken*")
+    st.markdown("---")
+
+    # ── KPI Row ───────────────────────────────────────────
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("XGBoost Precision",  "94.94%",
+                  delta="Best model")
+    with col2:
+        st.metric("False Alarms",       "4",
+                  delta="per 56,651 transactions",
+                  delta_color="off")
+    with col3:
+        st.metric("Class Imbalance",    "598:1",
+                  delta="Extreme imbalance",
+                  delta_color="inverse")
+    with col4:
+        st.metric("Autoencoder AUC-ROC","0.9289",
+                  delta="Unsupervised layer")
+
+    st.markdown("---")
+
+    # ── Purpose ───────────────────────────────────────────
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        st.markdown("### 🎯 Purpose")
+        st.markdown("""
+Credit card fraud costs the global banking industry
+over **\$30 billion annually**. Traditional rule-based
+systems generate excessive false alarms and cannot
+adapt to evolving fraud patterns.
+
+This system was built to:
+- Achieve **production-grade precision** on a 598:1
+  imbalanced dataset
+- Provide **SHAP explainability** — every prediction
+  must be explainable to auditors and customers
+- Build a **two-layer architecture** combining
+  supervised XGBoost with unsupervised Autoencoder
+- Meet **RBI regulatory requirements** for automated
+  financial decision systems
+        """)
+
+        st.markdown("### 🔭 Scope")
+        scope_data = {
+            "Component"   : ["Dataset", "Models Built",
+                              "Explainability", "Deployment",
+                              "Evaluation Metrics"],
+            "Details"     : [
+                "283,726 transactions · 473 frauds · 598:1 ratio",
+                "Logistic Reg → Random Forest → XGBoost (3 variants) → Autoencoder V1+V2",
+                "SHAP TreeExplainer — global + per-transaction waterfall plots",
+                "FastAPI REST endpoint + Streamlit dashboard (both live)",
+                "Precision, Recall, F1, AUC-ROC — Accuracy excluded"
+            ]
+        }
+        import pandas as pd
+        st.dataframe(pd.DataFrame(scope_data),
+                     use_container_width=True,
+                     hide_index=True)
+
+    with col2:
+        st.markdown("### ⚡ Actions Taken")
+        actions = [
+            ("Day 1-2", "Data Pipeline + Models",
+             "Removed duplicates. Engineered Log_Amount and Hour features. "
+             "Applied SMOTE. Compared 5 models. XGBoost Base won with "
+             "94.94% precision and only 4 false alarms."),
+            ("Day 3",   "SHAP Explainability",
+             "V14 identified as primary signal — 6.3 std separation. "
+             "Waterfall plots: fraud tx scored 99.6%, legit tx 0.0%."),
+            ("Day 4",   "Autoencoder",
+             "Trained on 226,602 legitimate only. AUC-ROC 0.9289. "
+             "Layer 2 catches novel fraud patterns XGBoost misses."),
+            ("Day 5",   "FastAPI Endpoint",
+             "/predict with real-time SHAP, /predict/batch, /health, "
+             "/docs. Pydantic validation. 100% prob on real fraud test."),
+            ("Day 6-7", "Dashboard + Launch",
+             "3-tab Streamlit dashboard deployed on Streamlit Cloud. "
+             "Pre-computed stats remove 144MB CSV dependency."),
+        ]
+        for day, title, desc in actions:
+            with st.expander(f"**{day} — {title}**",
+                             expanded=(day == "Day 1-2")):
+                st.markdown(desc)
+
+    st.markdown("---")
+
+    # ── Key Insights ──────────────────────────────────────
+    st.markdown("### 🧠 Key Insights")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.error("**Accuracy is Useless Here**\n\n"
+                 "99.83% accuracy catches zero fraud. "
+                 "We use Precision, Recall, F1 instead.")
+        st.info("**V14 Key Rule**\n\n"
+                "V14 < -3 → High fraud probability\n\n"
+                "6.3 standard deviation separation")
+    with col2:
+        st.warning("**Peak Fraud: 2AM-4AM**\n\n"
+                   "30x higher fraud rate than 10AM. "
+                   "Organised rings exploit overnight "
+                   "monitoring gaps.")
+        st.success("**XGBoost Winner**\n\n"
+                   "94.94% precision · 4 false alarms\n\n"
+                   "Best F1 of all 7 models tested")
+    with col3:
+        st.info("**Two-Layer System**\n\n"
+                "Layer 1 XGBoost: known fraud patterns\n\n"
+                "Layer 2 Autoencoder: novel patterns\n\n"
+                "Industry standard (Visa, Mastercard)")
+        st.warning("**598:1 Imbalance**\n\n"
+                   "SMOTE + scale_pos_weight=599\n\n"
+                   "Both approaches tested and compared")
+
+    st.markdown("---")
+
+    # ── Mind Map ──────────────────────────────────────────
+    st.markdown("### 🗺️ Parameter & Design Decision Map")
+    st.caption("Why each parameter and architectural "
+               "decision was made")
+
+    import plotly.graph_objects as go
+
+    # Build interactive mind map with Plotly
+    fig = go.Figure()
+
+    # Node positions
+    nodes = {
+        # Center
+        'center'    : (0, 0,   'FraudShield AI',        '#1B3A6B', 20),
+        # Branches
+        'data'      : (-3, 2.5,'DATA PIPELINE',          '#0D5C63', 14),
+        'models'    : (3, 2.5, 'MODEL SELECTION',        '#4A1B6B', 14),
+        'explain'   : (-4, 0,  'EXPLAINABILITY',         '#6B3A0D', 14),
+        'eval'      : (-3,-2.5,'EVALUATION',             '#0D5C2A', 14),
+        'deploy'    : (3, -2.5,'DEPLOYMENT',             '#1B4A6B', 14),
+        'twolayer'  : (0, -3,  'TWO-LAYER SYSTEM',       '#4A3A0D', 14),
+        # Data children
+        'd1'        : (-5, 3.8,'598:1 Imbalance',        '#0D4A4E', 10),
+        'd2'        : (-3, 3.8,'Log(Amount+1)',           '#0D4A4E', 10),
+        'd3'        : (-1.5,3.8,'Hour of Day',           '#0D4A4E', 10),
+        'd4'        : (-5, 1.5,'SMOTE',                  '#145C62', 10),
+        'd5'        : (-3, 1.2,'Stratified Split',       '#145C62', 10),
+        # Model children
+        'm1'        : (1.5, 3.8,'Logistic Reg',          '#3A1255', 10),
+        'm2'        : (3,   3.8,'Random Forest',          '#3A1255', 10),
+        'm3'        : (4.8, 3.8,'XGBoost ⭐',            '#6B1B9A', 10),
+        'm4'        : (2,   1.5,'scale_pos_weight=599',  '#5C1A7A', 10),
+        'm5'        : (4.5, 1.5,'Autoencoder',           '#5C1A7A', 10),
+        # Explain children
+        'e1'        : (-6,  1.2,'SHAP Values',           '#8B4513', 10),
+        'e2'        : (-6, -1.2,'V14 Feature',           '#8B4513', 10),
+        'e3'        : (-5.5,0,  'RBI Compliance',        '#5C2A08', 10),
+        # Eval children
+        'ev1'       : (-5, -3.8,'Precision',             '#0D4A20', 10),
+        'ev2'       : (-3, -4.0,'Recall',                '#0D4A20', 10),
+        'ev3'       : (-1.5,-3.8,'AUC-ROC',             '#0D4A20', 10),
+        'ev4'       : (-5, -1.8,'NOT Accuracy',          '#8B0000', 10),
+        # Deploy children
+        'dp1'       : (1.5,-3.8,'FastAPI',               '#143A5C', 10),
+        'dp2'       : (3,  -4.0,'Streamlit',             '#143A5C', 10),
+        'dp3'       : (4.8,-3.8,'SHAP/predict',          '#143A5C', 10),
+        'dp4'       : (5,  -1.8,'Pre-computed stats',    '#0D2A4A', 10),
+        # Two-layer children
+        'tl1'       : (-1.5,-4.5,'Layer 1: XGBoost',    '#5C4A10', 10),
+        'tl2'       : (1.5,-4.5, 'Layer 2: Autoencoder','#5C4A10', 10),
+    }
+
+    edges = [
+        ('center','data'),('center','models'),('center','explain'),
+        ('center','eval'),('center','deploy'),('center','twolayer'),
+        ('data','d1'),('data','d2'),('data','d3'),('data','d4'),('data','d5'),
+        ('models','m1'),('models','m2'),('models','m3'),('models','m4'),('models','m5'),
+        ('explain','e1'),('explain','e2'),('explain','e3'),
+        ('eval','ev1'),('eval','ev2'),('eval','ev3'),('eval','ev4'),
+        ('deploy','dp1'),('deploy','dp2'),('deploy','dp3'),('deploy','dp4'),
+        ('twolayer','tl1'),('twolayer','tl2'),
+    ]
+
+    # Draw edges
+    for src, tgt in edges:
+        x0,y0 = nodes[src][0], nodes[src][1]
+        x1,y1 = nodes[tgt][0], nodes[tgt][1]
+        fig.add_trace(go.Scatter(
+            x=[x0, x1], y=[y0, y1],
+            mode='lines',
+            line=dict(color='rgba(100,150,200,0.4)', width=1.5),
+            hoverinfo='none', showlegend=False
+        ))
+
+    # Draw nodes
+    for key, (x, y, label, color, size) in nodes.items():
+        fig.add_trace(go.Scatter(
+            x=[x], y=[y],
+            mode='markers+text',
+            marker=dict(size=size*3, color=color,
+                        line=dict(color='white', width=1)),
+            text=[label],
+            textposition='middle center',
+            textfont=dict(
+                size=max(size-2, 8),
+                color='white',
+                family='Arial'
+            ),
+            hovertext=[label],
+            hoverinfo='text',
+            showlegend=False
+        ))
+
+    fig.update_layout(
+        plot_bgcolor  = '#0A0C1A',
+        paper_bgcolor = '#0A0C1A',
+        font_color    = 'white',
+        height        = 600,
+        showlegend    = False,
+        xaxis=dict(showgrid=False, zeroline=False,
+                   showticklabels=False),
+        yaxis=dict(showgrid=False, zeroline=False,
+                   showticklabels=False),
+        margin=dict(l=20, r=20, t=20, b=20)
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption("Hover over any node to see details. "
+               "Zoom and pan to explore.")
+
 
 # ══════════════════════════════════════════════════════════
 # TAB 1 — OVERVIEW
